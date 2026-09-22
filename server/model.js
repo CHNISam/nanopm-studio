@@ -33,7 +33,7 @@ async function walk(dir) {
     throw error;
   }
   const result = [];
-  for (const entry of entries) {
+  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) result.push(...(await walk(full)));
     else if (
@@ -225,7 +225,18 @@ export async function loadProject(projectRoot) {
   const items = [...pages, ...claims];
   const opportunities = items.filter((x) => x.type === "opportunity");
   const solutions = items.filter((x) => x.type === "solution");
-  const byId = new Map(opportunities.map((x) => [x.id, x]));
+  const byId = new Map();
+  for (const opportunity of opportunities) {
+    const matches = byId.get(opportunity.id) || [];
+    matches.push(opportunity);
+    byId.set(opportunity.id, matches);
+  }
+  for (const [id, matches] of byId) {
+    if (matches.length > 1)
+      diagnostics.push(
+        `duplicate opportunity id ${id}: ${matches.map((x) => x.path).join(", ")}`,
+      );
+  }
   for (const solution of solutions) {
     if (!solution.opportunity)
       diagnostics.push(`${solution.path}: missing opportunity parent`);
@@ -233,6 +244,13 @@ export async function loadProject(projectRoot) {
       diagnostics.push(
         `${solution.path}: unresolved opportunity ${solution.opportunity}`,
       );
+    else if (byId.get(solution.opportunity).length > 1) {
+      diagnostics.push(
+        `${solution.path}: ambiguous opportunity ${solution.opportunity}`,
+      );
+      solution.declaredOpportunity = solution.opportunity;
+      solution.opportunity = "";
+    }
   }
   const objective =
     items.find((x) => x.type === "objectives") ||

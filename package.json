@@ -6,6 +6,9 @@
   "license": "MIT",
   "private": false,
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "bin": {
     "nanopm-studio": "./server/cli.js"
   },
@@ -20,9 +23,9 @@
     "start": "node server/cli.js",
     "build": "vite build",
     "prepare": "npm run build",
-    "test": "node --test tests/model.test.js",
+    "test": "node --test tests/model.test.js tests/server.test.js",
     "test:browser": "node --test tests/browser.test.js",
-    "format:check": "prettier --check src server tests package.json vite.config.js index.html"
+    "format:check": "prettier --check .github src server tests package.json vite.config.js index.html"
   },
   "dependencies": {
     "express": "^5.1.0",

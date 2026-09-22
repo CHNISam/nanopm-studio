@@ -4,3 +4,4 @@ release/
 .env
 .npm-cache/
 .tmp*
+test-results/
