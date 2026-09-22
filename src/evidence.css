@@ -1,0 +1,55 @@
+.proof-section {
+  margin-top: 26px;
+}
+.proof-section h3 {
+  font-size: 13px;
+  color: #46634f;
+  margin: 0 0 12px;
+}
+.proof-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.proof-card {
+  background: #fff;
+  border: 1px solid #e1e8e2;
+  border-radius: 8px;
+  padding: 15px;
+  text-align: left;
+  min-width: 0;
+}
+.proof-card:hover {
+  background: #f7faf7;
+}
+.proof-card > div {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.proof-card strong {
+  color: #2a4934;
+  line-height: 1.45;
+}
+.proof-card p {
+  color: #617767;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 9px 0;
+}
+.proof-card small {
+  color: #98a79b;
+}
+@media (max-width: 850px) {
+  .proof-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.tree-search {
+  margin-bottom: 16px;
+  max-width: 360px;
+}
