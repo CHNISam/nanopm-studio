@@ -101,3 +101,40 @@ test("section and roadmap heading forms", () => {
   );
   assert.equal(extractSignals("The result is unknown.").length, 0);
 });
+
+test("duplicate Opportunity IDs never create ambiguous Solution tree edges", async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "nanopm-studio-"));
+  const wiki = path.join(root, ".nanopm/wiki/entities");
+  try {
+    await fs.mkdir(path.join(wiki, "opportunities"), { recursive: true });
+    await fs.mkdir(path.join(wiki, "solutions"), { recursive: true });
+    await fs.writeFile(
+      path.join(wiki, "opportunities/first.md"),
+      "---\nid: same\ntype: opportunity\ntitle: First\n---\n",
+    );
+    await fs.writeFile(
+      path.join(wiki, "opportunities/second.md"),
+      "---\nid: same\ntype: opportunity\ntitle: Second\n---\n",
+    );
+    await fs.writeFile(
+      path.join(wiki, "solutions/child.md"),
+      "---\nid: child\ntype: solution\ntitle: Child\nopportunity: same\n---\n",
+    );
+    const snapshot = await loadProject(root);
+    assert.equal(snapshot.opportunities.length, 2);
+    assert.equal(snapshot.solutions[0].opportunity, "");
+    assert.equal(snapshot.solutions[0].declaredOpportunity, "same");
+    assert(
+      snapshot.diagnostics.some((x) =>
+        x.includes("duplicate opportunity id same"),
+      ),
+    );
+    assert(
+      snapshot.diagnostics.some((x) =>
+        x.includes("ambiguous opportunity same"),
+      ),
+    );
+  } finally {
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});

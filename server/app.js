@@ -49,6 +49,9 @@ export function createApp(initialProject = "") {
       res.status(400).json({ error: error.message });
     }
   });
+  app.use("/api", (_req, res) =>
+    res.status(404).json({ error: "Unknown API endpoint." }),
+  );
   app.use(express.static(path.resolve(here, "../dist")));
   app.get("/{*path}", async (_req, res) => {
     const html = path.resolve(here, "../dist/index.html");

@@ -1,45 +1,24 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
-import os from "node:os";
 import path from "node:path";
 import { chromium } from "playwright";
 import { createApp } from "../server/app.js";
+import { createProject, writePage } from "./support/project.js";
 
-async function fixture() {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "nanopm-ui-"));
-  const write = async (name, text) => {
-    const file = path.join(root, ".nanopm/wiki", name);
-    await fs.mkdir(path.dirname(file), { recursive: true });
-    await fs.writeFile(file, text);
-  };
-  await write(
-    "docs/objectives.md",
-    "---\ntype: objectives\ntitle: Current Product Outcome\n---\n# PO-1 — valuable outcome\n",
-  );
-  await write(
-    "entities/opportunities/need.md",
-    "---\nid: need\ntype: opportunity\ntitle: Find a worthwhile direction\nstatus: ready-for-solutions\npriority: high\nlinked_objectives: [PO-1]\n---\nNeed",
-  );
-  await write(
-    "entities/solutions/idea.md",
-    "---\nid: idea\ntype: solution\ntitle: Authored cues\nopportunity: need\nstatus: proposed\n---\n## Riskiest assumption\nPlayers notice cues.\n## Cheapest test\nWatch players.",
-  );
-  await write(
-    "docs/evidence.md",
-    "---\ntype: evidence\n---\nPO-1 is UNPROVEN.",
-  );
-  await write(
-    "docs/roadmap.md",
-    "---\ntype: roadmap\n---\n| Horizon | Result |\n| --- | --- |\n| Now | Test cues |\n| Next | Improve cues |\n| Later | Expand |",
-  );
-  return root;
+async function captureFailure(page, name, error) {
+  const directory = path.resolve("test-results");
+  await fs.mkdir(directory, { recursive: true });
+  await page
+    .screenshot({ path: path.join(directory, `${name}.png`), fullPage: true })
+    .catch(() => {});
+  throw error;
 }
 
 test("browser navigates Product model, search, details, and external file changes", async () => {
   const own = !process.env.NANOPM_ACCEPTANCE;
   const root = own
-    ? await fixture()
+    ? await createProject()
     : path.resolve(process.env.NANOPM_ACCEPTANCE);
   const server = createApp(root).listen(0, "127.0.0.1");
   const browser = await chromium.launch({
@@ -49,6 +28,8 @@ test("browser navigates Product model, search, details, and external file change
       : {}),
   });
   const page = await browser.newPage();
+  const pageErrors = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
   try {
     const port = server.address().port;
     await page.goto(`http://127.0.0.1:${port}`);
@@ -147,9 +128,77 @@ test("browser navigates Product model, search, details, and external file change
       await page.getByText("Updated externally.").waitFor({ timeout: 7000 });
     }
     assert.equal(await page.locator("body").count(), 1);
+    assert.deepEqual(pageErrors, []);
+  } catch (error) {
+    await captureFailure(page, "product-flow", error);
   } finally {
     await browser.close();
     await new Promise((resolve) => server.close(resolve));
     if (own) await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
+test("browser opens a project, filters the tree, and recovers after a malformed page is repaired", async () => {
+  const root = await createProject();
+  const broken = await writePage(
+    root,
+    "entities/solutions/broken.md",
+    "---\nfoo: [unterminated\n---\n",
+  );
+  const server = createApp("").listen(0, "127.0.0.1");
+  const browser = await chromium.launch({
+    headless: true,
+    ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
+      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE }
+      : {}),
+  });
+  const page = await browser.newPage();
+  const pageErrors = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  try {
+    await page.goto(`http://127.0.0.1:${server.address().port}`);
+    await page
+      .getByRole("heading", { name: "Open a NanoPM project" })
+      .waitFor();
+    await page
+      .getByRole("textbox", { name: "Project folder" })
+      .fill("relative-folder");
+    await page.getByRole("button", { name: "Open project" }).click();
+    await page
+      .getByRole("alert")
+      .getByText(/absolute project folder/)
+      .waitFor();
+    await page.getByRole("textbox", { name: "Project folder" }).fill(root);
+    await page.getByRole("button", { name: "Open project" }).click();
+    await page.getByRole("heading", { name: /PO-1/ }).first().waitFor();
+    await page.getByText("1 source diagnostics").waitFor();
+
+    await page
+      .getByRole("navigation", { name: "Main navigation" })
+      .getByRole("button", { name: "Product tree" })
+      .click();
+    await page
+      .getByRole("textbox", { name: "Search Product tree" })
+      .fill("Authored cues");
+    await page.getByRole("button", { name: "Authored cues" }).waitFor();
+
+    await fs.writeFile(
+      broken,
+      "---\nid: repaired\ntype: solution\ntitle: Repaired candidate\nopportunity: need\nstatus: proposed\n---\n## Riskiest assumption\nA player notices it.\n",
+    );
+    await page
+      .getByText("1 source diagnostics")
+      .waitFor({ state: "detached", timeout: 7000 });
+    await page
+      .getByRole("textbox", { name: "Search Product tree" })
+      .fill("Repaired candidate");
+    await page.getByRole("button", { name: "Repaired candidate" }).waitFor();
+    assert.deepEqual(pageErrors, []);
+  } catch (error) {
+    await captureFailure(page, "project-recovery", error);
+  } finally {
+    await browser.close();
+    await new Promise((resolve) => server.close(resolve));
+    await fs.rm(root, { recursive: true, force: true });
   }
 });

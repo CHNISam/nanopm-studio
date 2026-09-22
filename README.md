@@ -51,7 +51,11 @@ npx playwright install chromium
 npm run test:browser
 ```
 
-Tests cover parsing, explicit relations, roadmap structures, malformed source handling, and evidence labels. The browser test uses a temporary fixture by default and checks external file updates. Set `NANOPM_ACCEPTANCE` to a current `develop` checkout of [Nameless Reach](https://github.com/CHNISam/LiteTavern-Prototype) to run its real Product acceptance assertions. If using an installed Chromium instead of Playwright's browser, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to that executable path.
+Tests cover parsing, explicit relations, roadmap structures, malformed source handling, evidence labels, ambiguous parent IDs, HTTP project selection, read-only behavior, loopback CLI startup, and browser workflows. The browser suite uses a disposable project, checks external file updates and malformed-file recovery, and saves a screenshot in `test-results/` on failure.
+
+The [CI gate](.github/workflows/verify.yml) runs format, model/server tests, build, and package checks on Windows, macOS, and Linux. It runs Chromium workflows on all three platforms with Node 22 and repeats the core checks on Node 20. A failure is a failed gate; browser screenshots are uploaded when available.
+
+For the real acceptance case, set `NANOPM_ACCEPTANCE` to a clean checkout of the current `develop` branch of [Nameless Reach](https://github.com/CHNISam/LiteTavern-Prototype), then run `npm run test:browser`. This is an explicit acceptance run because that separate repository may require access unavailable to this repository's CI token. If using an installed Chromium instead of Playwright's browser, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to that executable path.
 
 ## License and attribution
 
