@@ -1,0 +1,43 @@
+{
+  "name": "nanopm-studio",
+  "version": "0.1.0",
+  "description": "Local-first Product management interface for NanoPM",
+  "repository": "github:CHNISam/nanopm-studio",
+  "license": "MIT",
+  "private": false,
+  "type": "module",
+  "bin": {
+    "nanopm-studio": "./server/cli.js"
+  },
+  "files": [
+    "dist",
+    "server",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "start": "node server/cli.js",
+    "build": "vite build",
+    "test": "node --test tests/model.test.js",
+    "test:browser": "node --test tests/browser.test.js",
+    "format:check": "prettier --check src server tests package.json vite.config.js index.html"
+  },
+  "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
+    "cmdk": "^1.1.1",
+    "express": "^5.1.0",
+    "gray-matter": "^4.0.3",
+    "lucide-react": "^0.468.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
+    "playwright": "^1.63.0",
+    "prettier": "^3.9.8",
+    "vite": "^6.3.0"
+  }
+}

@@ -1,0 +1,11 @@
+# Architecture and delivery plan
+
+NanoPM Studio is a local human control surface over an existing `.nanopm/wiki`. It currently reads Product state. Upstream NanoPM owns schemas, the query/ingest/lint commands and human decision gates. A read-only adapter interprets frontmatter and the canonical page structure, attaches only explicit parent and objective links, and reports broken references as diagnostics. It does not synthesize evidence verdicts.
+
+The local Node service reads a selected project and exposes one normalized snapshot and page content. React presents Home, Tree, Opportunities, Solutions, Evidence, Roadmap, detail, and command search. The CLI binds a random loopback port and opens the default browser on Windows/macOS/Linux. No daemon or account is required. The browser polls the local API for external file changes; no persistent index is created.
+
+Source references: upstream NanoPM `pm-opportunities`, `pm-solutions`, `pm-objectives`, `pm-strategy`, `pm-roadmap`, `pm-prd`, `bin/nanopm-ingest-agent`, `.nanopm/wiki/entities/*/SCHEMA.md`, Viewer PRD and source; Nameless Reach develop `.nanopm/wiki`. The official Viewer is a macOS SwiftUI artifact reader and is not reused. The current Nameless Reach Product proof extension is parsed from explicit `Current judgment` sections without changing NanoPM's generic entity schema.
+
+Capability sourcing: Plane's web package declares AGPL-3.0 and uses TanStack Table, cmdk, Headless UI, React Router, and Atlassian Pragmatic Drag and Drop. Backlog.md's MIT package uses a local CLI entry point, gray-matter, React, and Fuse. Studio adopts the compatible TanStack and cmdk primitives for its table and global navigation, uses gray-matter for NanoPM frontmatter, and uses react-markdown with remark-gfm for secondary narrative content. Native HTML details supplies tree expand/collapse without a custom tree state machine. There is no drag/drop use case in the current NanoPM relationships, so that dependency is omitted. No Plane source is copied.
+
+Implementation stages: (1) data adapter and tests, (2) local API and CLI, (3) integrated management UI, (4) real-project smoke and documentation. Complex Product decisions stay in upstream NanoPM's skills.
