@@ -3,9 +3,10 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadProject } from "./model.js";
+import { createWorkspaceStore } from "./workspaces.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-export function createApp(initialProject = "") {
+export function createApp(initialProject = "", options = {}) {
   const app = express();
   app.disable("x-powered-by");
   app.use((req, res, next) => {
@@ -18,6 +19,18 @@ export function createApp(initialProject = "") {
   });
   app.use(express.json({ limit: "32kb" }));
   let project = initialProject;
+  let remembered = false;
+  const workspaces = options.workspaces || createWorkspaceStore();
+  const snapshot = async (projectPath, forceRemember = false) => {
+    const result = await loadProject(projectPath);
+    let resolvedProject = projectPath;
+    if (forceRemember || !remembered) {
+      resolvedProject = await workspaces.remember(projectPath);
+      project = resolvedProject;
+      remembered = true;
+    }
+    return { ...result, project: resolvedProject };
+  };
   app.get("/api/project", async (_req, res) => {
     if (!project)
       return res.json({
@@ -30,7 +43,7 @@ export function createApp(initialProject = "") {
         diagnostics: [],
       });
     try {
-      res.json(await loadProject(project));
+      res.json(await snapshot(project));
     } catch (error) {
       res.status(400).json({ error: error.message, project });
     }
@@ -42,12 +55,13 @@ export function createApp(initialProject = "") {
         .status(400)
         .json({ error: "Enter an absolute project folder path." });
     try {
-      const snapshot = await loadProject(candidate);
-      project = candidate;
-      res.json(snapshot);
+      res.json(await snapshot(candidate, true));
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
+  });
+  app.get("/api/workspaces", async (_req, res) => {
+    res.json({ current: project, recent: await workspaces.list() });
   });
   app.use("/api", (_req, res) =>
     res.status(404).json({ error: "Unknown API endpoint." }),

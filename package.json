@@ -23,13 +23,15 @@
     "start": "node server/cli.js",
     "build": "vite build",
     "prepare": "npm run build",
-    "test": "node --test tests/model.test.js tests/server.test.js",
+    "test": "node --test tests/model.test.js tests/server.test.js tests/workspaces.test.js",
     "test:browser": "node --test tests/browser.test.js",
     "format:check": "prettier --check .github src server tests package.json vite.config.js index.html"
   },
   "dependencies": {
+    "conf": "^15.1.0",
     "express": "^5.1.0",
-    "gray-matter": "^4.0.3"
+    "gray-matter": "^4.0.3",
+    "open": "^11.0.4"
   },
   "devDependencies": {
     "@tanstack/react-table": "^8.21.3",
@@ -41,6 +43,7 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.18.4",
     "remark-gfm": "^4.0.1",
     "vite": "^6.3.0"
   }
