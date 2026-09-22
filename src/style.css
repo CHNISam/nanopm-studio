@@ -1,5 +1,9 @@
 :root {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
   color: #172329;
   background: #f7f8f6;
   font-size: 13px;
@@ -35,7 +39,11 @@ p {
 h1,
 h2,
 h3 {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
   letter-spacing: -0.025em;
 }
 h1 {
