@@ -115,7 +115,7 @@ h3 {
   display: grid;
   gap: 3px;
 }
-.sidebar nav button,
+.sidebar nav a,
 .sidebar-bottom button {
   border: 0;
   background: none;
@@ -128,13 +128,14 @@ h3 {
   border-radius: 7px;
   width: 100%;
   font-weight: 600;
+  text-decoration: none;
 }
-.sidebar nav button:hover,
+.sidebar nav a:hover,
 .sidebar-bottom button:hover {
   background: #213c3e;
   color: #fff;
 }
-.sidebar nav button.active {
+.sidebar nav a.active {
   background: #2c5350;
   color: #fff;
 }
@@ -411,15 +412,16 @@ h3 {
   border-radius: 9px;
 }
 table {
-  width: 100%;
   border-collapse: collapse;
-  min-width: 980px;
+  min-width: 100%;
+  table-layout: fixed;
 }
 th {
   text-align: left;
   background: #f7faf7;
   border-bottom: 1px solid #e3eae3;
   white-space: nowrap;
+  position: relative;
 }
 th button {
   border: 0;
@@ -438,10 +440,27 @@ td {
   vertical-align: middle;
   color: #44564e;
   line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 td:first-child {
   color: #1e302c;
   min-width: 225px;
+}
+th.identity,
+td.identity {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: #fff;
+  box-shadow: 1px 0 #e7ece8;
+}
+th.identity {
+  z-index: 3;
+  background: #f7faf7;
+}
+tbody tr:hover td.identity {
+  background: #f5faf6;
 }
 tbody tr {
   cursor: pointer;
@@ -532,12 +551,23 @@ tbody tr:last-child td {
 .tree-children {
   padding-left: 15px;
 }
+.tree-solution {
+  padding-bottom: 5px;
+}
+.tree-facts {
+  display: grid;
+  gap: 4px;
+  padding: 0 14px 8px;
+}
 .tree-leaf {
   border-left: 1px solid #dce8dd;
   padding: 10px 14px;
   color: #647c6b;
   line-height: 1.5;
   max-width: 850px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .tree-leaf b {
   color: #52775d;
@@ -602,7 +632,7 @@ tbody tr:last-child td {
 .roadmap-lane {
   background: #edf2ed;
   border-radius: 9px;
-  min-height: 300px;
+  min-height: 150px;
   padding: 13px;
 }
 .lane-title {
@@ -883,6 +913,124 @@ tbody tr:last-child td {
   padding: 0 17px;
   font-weight: 700;
 }
+.project-switcher {
+  position: relative;
+  margin: 0 0 18px;
+}
+.project-trigger {
+  width: 100%;
+  border: 1px solid #355052;
+  background: #1a3436;
+  color: #eaf4ef;
+  border-radius: 7px;
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+}
+.project-trigger span,
+.project-menu button span,
+.recent-start button span {
+  min-width: 0;
+  display: grid;
+}
+.project-trigger small,
+.project-menu small,
+.recent-start small {
+  font-size: 9px;
+  color: #8fb0a8;
+}
+.project-trigger strong {
+  max-width: 155px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.project-menu {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  z-index: 8;
+  width: 285px;
+  background: #fff;
+  color: #244039;
+  border: 1px solid #dae5dd;
+  box-shadow: 0 14px 40px #071d1b42;
+  border-radius: 8px;
+  padding: 7px;
+}
+.menu-label {
+  display: block;
+  padding: 7px 9px;
+  color: #859990;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.project-menu button,
+.recent-start button {
+  width: 100%;
+  border: 0;
+  background: none;
+  color: inherit;
+  border-radius: 5px;
+  padding: 9px;
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  text-align: left;
+}
+.project-menu button:hover,
+.recent-start button:hover {
+  background: #eff6f0;
+}
+.project-menu button:disabled,
+.recent-start button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.project-menu small,
+.recent-start small {
+  color: #8b9d94;
+  margin-top: 2px;
+}
+.project-menu button svg:last-child {
+  margin-left: auto;
+}
+.project-dialog {
+  width: min(670px, 92vw);
+  background: #fff;
+  border-radius: 11px;
+  padding: 28px;
+  box-shadow: 0 20px 70px #061b2055;
+}
+.project-dialog form,
+.recent-start {
+  display: flex;
+  gap: 8px;
+}
+.project-dialog input {
+  flex: 1;
+  border: 1px solid #d6e0d7;
+  padding: 11px;
+  border-radius: 6px;
+}
+.project-dialog button[type="submit"] {
+  background: #245d4e;
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 17px;
+  font-weight: 700;
+}
+.recent-start {
+  margin-top: 22px;
+  display: grid;
+}
+.recent-start .eyebrow {
+  padding: 0 9px;
+}
 .loading {
   color: #8ca198;
   padding: 40px;
@@ -898,16 +1046,16 @@ tbody tr:last-child td {
   }
   .sidebar .brand > span:last-child,
   .project-label,
-  .sidebar nav button:not(.active),
-  .sidebar nav button.active {
+  .sidebar nav a:not(.active),
+  .sidebar nav a.active {
     font-size: 0;
   }
-  .sidebar nav button {
+  .sidebar nav a {
     justify-content: center;
     padding: 12px;
   }
   .sidebar-bottom,
-  .project-root {
+  .project-switcher {
     display: none;
   }
   .topbar {

@@ -1,11 +1,19 @@
-# Architecture and delivery plan
+# Architecture
 
-NanoPM Studio is a local human control surface over an existing `.nanopm/wiki`. It currently reads Product state. Upstream NanoPM owns schemas, the query/ingest/lint commands and human decision gates. A read-only adapter interprets frontmatter and the canonical page structure, attaches only explicit parent and objective links, and reports broken references as diagnostics. It does not synthesize evidence verdicts.
+NanoPM Studio is a local human control surface over an existing `.nanopm/wiki`. Upstream NanoPM owns schemas, query/ingest/lint commands, and human decision gates. The read-only adapter interprets frontmatter and canonical page structure, attaches only explicit parent and objective links, and reports broken references as diagnostics. It does not synthesize evidence verdicts.
 
-The local Node service reads a selected project and exposes one normalized snapshot and page content. React presents Home, Tree, Opportunities, Solutions, Evidence, Roadmap, detail, and command search. The CLI binds a random loopback port and opens the default browser on Windows/macOS/Linux. No daemon or account is required. The browser polls the local API for external file changes; no persistent index is created.
+The local Node service exposes one normalized Product snapshot and source content. React Router owns stable browser navigation for Current, Tree, Opportunities, Solutions, Evidence, Roadmap, and entity Detail. The CLI binds a random loopback port and uses `open` to launch the browser. The client polls for external file changes; no persistent Product index is created.
 
-Source references: upstream NanoPM `pm-opportunities`, `pm-solutions`, `pm-objectives`, `pm-strategy`, `pm-roadmap`, `pm-prd`, `bin/nanopm-ingest-agent`, `.nanopm/wiki/entities/*/SCHEMA.md`, Viewer PRD and source; Nameless Reach develop `.nanopm/wiki`. The official Viewer is a macOS SwiftUI artifact reader and is not reused. The current Nameless Reach Product proof extension is parsed from explicit `Current judgment` sections without changing NanoPM's generic entity schema.
+`server/workspaces.js` uses Conf for an atomic, bounded MRU in the operating system user configuration location. It stores only Studio preferences: last project, display name, last-opened time, and local path. Entries are persisted only after a NanoPM project parses successfully. Missing folders are reported as unavailable. No preference or derived state is written into `.nanopm`.
 
-Capability sourcing: Plane's web package declares AGPL-3.0 and uses TanStack Table, cmdk, Headless UI, React Router, and Atlassian Pragmatic Drag and Drop. Backlog.md's MIT package uses a local CLI entry point, gray-matter, React, and Fuse. Studio adopts the compatible TanStack and cmdk primitives for its table and global navigation, uses gray-matter for NanoPM frontmatter, and uses react-markdown with remark-gfm for secondary narrative content. Native HTML details supplies tree expand/collapse without a custom tree state machine. There is no drag/drop use case in the current NanoPM relationships, so that dependency is omitted. No Plane source is copied.
+The client is split by responsibility: `src/app` owns routing and application lifecycle, `src/api` owns HTTP access, `src/components` owns reusable Product presentation, `src/features` owns management surfaces, and `src/model.js` holds shared formatting. NanoPM parsing and relations remain in the server adapter rather than React components.
 
-Implementation stages: (1) data adapter and tests, (2) local API and CLI, (3) integrated management UI, (4) real-project smoke and documentation. Complex Product decisions stay in upstream NanoPM's skills.
+## Sources and capability choices
+
+The adapter follows upstream NanoPM opportunities, solutions, objectives, strategy, roadmap, PRD, ingest, schemas, Viewer PRD/source, and current Nameless Reach `develop` data. The official Viewer remains a reference rather than a dependency. Nameless Reach Product proof pages are parsed from explicit `Current judgment` sections without changing NanoPM's generic entity schema.
+
+VS Code's workspace history provides the MRU pattern: explicit workspace precedence, recent ordering, deduplication, and graceful missing-entry handling. Plane's web package uses TanStack Table, cmdk, React Router, and other mature primitives; its AGPL implementation was studied but not copied. Backlog.md's MIT package informed the lightweight local CLI pattern.
+
+Studio directly adopts permissive React Router, TanStack Table, cmdk, Conf, and open capabilities. Gray-matter parses NanoPM frontmatter, and React Markdown with remark-gfm renders secondary narrative. Native HTML details supplies Opportunity expansion without a custom tree state machine. Drag and drop has no valid NanoPM relationship mutation use case in this read-only release, so no dependency is included.
+
+Windows is the maintained production platform. CI runs full browser coverage on Windows and keeps one low-cost Linux build signal. Complex Product decisions stay in upstream NanoPM skills and files.

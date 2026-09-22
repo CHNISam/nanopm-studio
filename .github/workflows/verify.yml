@@ -18,13 +18,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: windows-latest
             node: 20
-          - os: ubuntu-latest
-            node: 22
           - os: windows-latest
             node: 22
-          - os: macos-latest
+          # Cheap portability signal; Windows is the production platform.
+          - os: ubuntu-latest
             node: 22
     steps:
       - uses: actions/checkout@v7
@@ -37,13 +36,11 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm pack --dry-run
-      - if: matrix.node == 22 && runner.os == 'Linux'
-        run: npx playwright install --with-deps chromium
-      - if: matrix.node == 22 && runner.os != 'Linux'
+      - if: matrix.node == 22 && runner.os == 'Windows'
         run: npx playwright install chromium
-      - if: matrix.node == 22
+      - if: matrix.node == 22 && runner.os == 'Windows'
         run: npm run test:browser
-      - if: failure() && matrix.node == 22
+      - if: failure() && matrix.node == 22 && runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
           name: browser-failure-${{ matrix.os }}

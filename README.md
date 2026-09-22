@@ -1,62 +1,63 @@
 # NanoPM Studio
 
-NanoPM Studio is a local, browser-based Product management surface for [NanoPM](https://github.com/nmrtn/nanopm). It turns an existing `.nanopm/wiki` into a current Product view, an Opportunity Solution Tree, sortable Opportunity and Solution tables, explicit evidence signals, a Now–Next–Later roadmap, structured detail panels, and global search. The files in `.nanopm/` remain the Product source of truth.
+NanoPM Studio is a local, browser-based Product management surface for [NanoPM](https://github.com/nmrtn/nanopm). It turns an existing `.nanopm/wiki` into a current Product view, Opportunity Solution Tree, structured Opportunity and Solution tables, explicit evidence signals, a Now–Next–Later roadmap, detail panels, and global search. `.nanopm/` remains the sole Product source of truth.
 
 ## Run
 
-Requires Node.js 20 or newer. Windows, macOS, and Linux are supported.
+Requires Node.js 20 or newer. Windows is the maintained production platform. The local Node/browser architecture remains portable, with an inexpensive Linux build signal retained in CI.
 
-```sh
+```powershell
 npm install
 npm run build
 npm link
-cd /path/to/a/NanoPM/project
+cd D:\path\to\a\NanoPM\project
 nanopm-studio
 ```
 
-The command binds an available port on `127.0.0.1`, opens the default browser, and stops when you stop the terminal process. Use `nanopm-studio --project /absolute/path/to/project` from elsewhere. Use `--no-open` when browser launching is undesirable. There is no account, daemon, or external database.
+The command binds an available port on `127.0.0.1`, opens the default browser, and stops with the terminal process. Studio remembers the last successfully opened project in the normal per-user application configuration folder. You can also run `nanopm-studio .`, pass another positional folder, or use `nanopm-studio --project D:\path\to\project`; an explicit path always wins. Use `--no-open` when browser launching is undesirable. There is no account, daemon, or external database.
 
 For development:
 
-```sh
+```powershell
 npm install
 npm run dev
 ```
 
-Run the API separately with `npm start -- --project /absolute/path/to/project --no-open`. Vite proxies `/api` to the local API during development.
+Run the API separately with `npm start -- --project D:\path\to\project --no-open`. Vite proxies `/api` to the local API during development.
 
 ## How to use it
 
-- **Current** shows the outcome, active Opportunities, selected Solution bets, explicit unproven or unknown evidence signals, and recent NanoPM page changes.
-- **Product tree** uses the objective links and each Solution's single Opportunity parent. Assumption and test text is shown under its Solution when present.
-- **Opportunities** and **Solutions** offer sorting, text search, status filters, and structured details. Select a row to open the detail panel.
-- **Evidence & learning** extracts only explicit verdict words from NanoPM evidence pages. Read the cited source narrative for scope and limitations.
-- **Roadmap** presents the canonical Product roadmap's Now, Next, and Later horizons.
-- Press **Ctrl+K** (or **⌘K**) for global navigation across NanoPM entities and pages.
+- **Current** shows the Product outcome, active Opportunities, selected Solution bets, explicit unproven or unknown evidence signals, and recent NanoPM changes.
+- **Product tree** uses only explicit objective and Solution parent links. Assumption and Test summaries stay compact; full narrative remains in Detail.
+- **Opportunities** and **Solutions** provide sorting, text search, status filters, a fixed identity column, and structured details.
+- **Evidence & learning** exposes explicit source judgments with search and state filtering. Studio never strengthens Product proof.
+- **Roadmap** presents canonical Now, Next, and Later Product horizons.
+- Use the sidebar project switcher or **Ctrl+K** to open and switch recent projects without restarting Studio. Missing recent folders remain visible as unavailable.
+- Product surfaces and open entity details have stable browser routes, including refresh and back/forward behavior.
 
-The browser refreshes the model every three seconds, so agent or human edits to `.nanopm/` appear without an import step. Malformed files and unresolved Solution parents are reported in source diagnostics. Product decisions are currently read-only in Studio; make them through NanoPM's canonical skills and files. Studio does not call Backlog.md or create execution state.
+The browser refreshes the model every three seconds, so Agent or human edits to `.nanopm/` appear without an import step. Malformed files and unresolved Solution parents are reported in source diagnostics. Product decisions remain read-only in Studio; make them through NanoPM's canonical skills and files. Studio does not call Backlog.md or create execution state.
 
 ## Architecture
 
-`server/model.js` parses the wiki into a disposable snapshot. `server/app.js` serves that snapshot and the browser bundle. `server/cli.js` binds to loopback and opens the browser. `src/` contains the React interface. There is no persistent Studio Product store or secondary index. Search filters the current snapshot, which is small for the known NanoPM projects. See [architecture notes](docs/architecture.md).
+`server/model.js` parses the wiki into a disposable snapshot. `server/app.js` serves the snapshot and browser bundle. `server/workspaces.js` owns bounded MRU preferences outside the project. `server/cli.js` binds to loopback and opens the browser. The React client separates routing and application state, API access, shared Product components, and Product surfaces. There is no persistent Studio Product store or secondary index. See [architecture notes](docs/architecture.md).
 
-The adapter reads canonical NanoPM frontmatter, section headings, and roadmap tables/headings. It does not infer evidence verdicts. NanoPM's query, ingest, lint, and skill workflows remain authoritative for Product reasoning and mutation. The official NanoPM Viewer is a reference, not a dependency.
+NanoPM's query, ingest, lint, and skill workflows remain authoritative for Product reasoning and mutation. The official NanoPM Viewer is a reference, not a dependency.
 
 ## Verify
 
-```sh
+```powershell
 npm test
 npm run build
 npx playwright install chromium
 npm run test:browser
 ```
 
-Tests cover parsing, explicit relations, roadmap structures, malformed source handling, evidence labels, ambiguous parent IDs, HTTP project selection, read-only behavior, loopback CLI startup, and browser workflows. The browser suite uses a disposable project, checks external file updates and malformed-file recovery, and saves a screenshot in `test-results/` on failure.
+Tests cover parsing, explicit relations, roadmap structures, malformed source handling, evidence labels, ambiguous parent IDs, MRU persistence and deduplication, CLI restore and explicit override, HTTP project selection, stable routes, project switching, missing recent folders, external file updates, and malformed-file recovery. Browser failures save a screenshot under `test-results/`.
 
-The [CI gate](.github/workflows/verify.yml) runs format, model/server tests, build, and package checks on Windows, macOS, and Linux. It runs Chromium workflows on all three platforms with Node 22 and repeats the core checks on Node 20. A failure is a failed gate; browser screenshots are uploaded when available.
+The [CI gate](.github/workflows/verify.yml) runs the full browser workflow on Windows Node 22 and repeats core checks on Windows Node 20. Ubuntu Node 22 provides a low-cost portability signal. Windows is the release criterion.
 
-For the real acceptance case, set `NANOPM_ACCEPTANCE` to a clean checkout of the current `develop` branch of [Nameless Reach](https://github.com/CHNISam/LiteTavern-Prototype), then run `npm run test:browser`. This is an explicit acceptance run because that separate repository may require access unavailable to this repository's CI token. If using an installed Chromium instead of Playwright's browser, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to that executable path.
+For the real acceptance case, set `NANOPM_ACCEPTANCE` to a clean checkout of the current `develop` branch of [Nameless Reach](https://github.com/CHNISam/LiteTavern-Prototype), then run `npm run test:browser`. Set `STUDIO_SCREENSHOT` to capture the real Current surface.
 
 ## License and attribution
 
-NanoPM Studio is MIT licensed; see [LICENSE](LICENSE). NanoPM itself is MIT licensed, copyright its respective contributors. The Studio adapter is independent code built against NanoPM's published file conventions. React, TanStack Table, cmdk, gray-matter, Express, React Markdown, Vite, and Lucide are permissively licensed dependencies. Product interaction research included Plane and Backlog.md; their code is not copied into this repository.
+NanoPM Studio is MIT licensed; see [LICENSE](LICENSE). NanoPM itself is MIT licensed, copyright its respective contributors. The Studio adapter is independent code built against NanoPM's published file conventions. React Router, TanStack Table, cmdk, Conf, open, gray-matter, Express, React Markdown, Vite, React, and Lucide are permissively licensed dependencies. Product interaction research included VS Code, Plane, and Backlog.md; their code is not copied into this repository.
