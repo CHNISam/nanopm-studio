@@ -6,7 +6,6 @@ import {
   BookOpen,
   Check,
   ChevronDown,
-  Compass,
   FileText,
   FolderOpen,
   GitBranch,
@@ -25,21 +24,20 @@ import {
   useParams,
 } from "react-router-dom";
 import { Badge, Detail, Grid } from "../components/ProductUI.jsx";
-import { Current, Evidence, Roadmap, Tree } from "../features/ProductPages.jsx";
+import { Evidence, Roadmap, Tree } from "../features/ProductPages.jsx";
 import { date, pretty } from "../model.js";
 import { ProductProvider, useProduct } from "./ProductContext.jsx";
 
 const views = [
-  ["current", "Current", Compass, "/"],
-  ["tree", "Product tree", GitBranch, "/tree"],
+  ["tree", "Product tree", GitBranch, "/"],
   ["opportunities", "Opportunities", Layers3, "/opportunities"],
   ["solutions", "Solutions", ListFilter, "/solutions"],
-  ["evidence", "Evidence & learning", BookOpen, "/evidence"],
+  ["evidence", "Evidence", BookOpen, "/evidence"],
   ["roadmap", "Roadmap", Map, "/roadmap"],
 ];
 const validSurfaces = new Set(views.map(([key]) => key));
 const columnHelper = createColumnHelper();
-const surfacePath = (surface) => (surface === "current" ? "/" : `/${surface}`);
+const surfacePath = (surface) => (surface === "tree" ? "/" : `/${surface}`);
 const entityPath = (surface, item) =>
   `${surfacePath(surface).replace(/\/$/, "") || ""}/entity/${encodeURIComponent(item.type)}/${encodeURIComponent(item.id)}`;
 
@@ -145,7 +143,7 @@ function ProjectSwitcher({ open, setOpen, onChoose, onAnother }) {
 function Workspace() {
   const params = useParams();
   const navigate = useNavigate();
-  const surface = params.surface || "current";
+  const surface = params.surface || "tree";
   const { data, error, workspaces, selectProject } = useProduct();
   const [palette, setPalette] = useState(false);
   const [switcher, setSwitcher] = useState(false);
@@ -191,7 +189,6 @@ function Workspace() {
     }
     return opened;
   };
-  const go = (target) => navigate(surfacePath(target));
   const opportunityColumns = useMemo(
     () => [
       columnHelper.accessor("title", {
@@ -288,7 +285,7 @@ function Workspace() {
             <NavLink
               key={key}
               to={path}
-              end={key === "current"}
+              end={path === "/"}
               onClick={() => {
                 setQuery("");
                 setFilter("");
@@ -324,7 +321,6 @@ function Workspace() {
         <main>
           <div className="page-heading">
             <div>
-              <span className="eyebrow">NANOPM WIKI</span>
               <h1>{title}</h1>
             </div>
             {data?.project && (
@@ -353,9 +349,6 @@ function Workspace() {
                     <p key={index}>{item}</p>
                   ))}
                 </details>
-              )}
-              {surface === "current" && (
-                <Current data={data} select={select} go={go} />
               )}
               {surface === "tree" && <Tree data={data} select={select} />}
               {surface === "opportunities" && (
@@ -506,6 +499,8 @@ export function App() {
       <ProductProvider>
         <Routes>
           <Route path="/" element={<Workspace />} />
+          <Route path="/tree" element={<Navigate to="/" replace />} />
+          <Route path="/entity/:type/:id" element={<Workspace />} />
           <Route path="/:surface" element={<Workspace />} />
           <Route path="/:surface/entity/:type/:id" element={<Workspace />} />
           <Route path="*" element={<Navigate to="/" replace />} />

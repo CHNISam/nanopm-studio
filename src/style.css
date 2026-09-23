@@ -222,31 +222,6 @@ h3 {
   border-radius: 6px;
   font-weight: 600;
 }
-.hero {
-  background: #e9f1ea;
-  border: 1px solid #d9e9db;
-  border-radius: 11px;
-  padding: 24px 28px;
-  margin-bottom: 19px;
-  max-width: 100%;
-  position: relative;
-}
-.hero h2 {
-  margin: 7px 0 8px;
-  max-width: 920px;
-}
-.hero p {
-  max-width: 1040px;
-  color: #526b63;
-  line-height: 1.6;
-  max-height: 3.2em;
-  overflow: hidden;
-}
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 17px;
-}
 .panel,
 .tree-panel {
   background: #fff;
@@ -254,16 +229,6 @@ h3 {
   border-radius: 10px;
   box-shadow: 0 1px 3px #14352907;
 }
-.panel-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 17px 19px 10px;
-}
-.panel-head h3 {
-  margin: 0;
-}
-.panel-head button,
 .text-link {
   color: #207b6d;
   border: 0;
@@ -274,54 +239,13 @@ h3 {
   gap: 5px;
   padding: 0;
 }
-.stack-row,
-.signal-row {
-  border: 0;
-  border-top: 1px solid #eef1ee;
-  background: #fff;
-  width: 100%;
-  text-align: left;
-  padding: 12px 19px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 13px;
-  color: #203331;
-}
-.stack-row:hover,
-.signal-row:hover,
 .evidence-card:hover {
   background: #f7faf7;
-}
-.stack-row strong {
-  display: block;
-  font-weight: 700;
-  line-height: 1.4;
-}
-.stack-row small {
-  display: block;
-  color: #879991;
-  margin-top: 3px;
-}
-.stack-row time {
-  font-size: 11px;
-  color: #84958f;
 }
 .quiet {
   padding: 20px;
   color: #70847b;
   line-height: 1.55;
-}
-.signal-row {
-  align-items: flex-start;
-  justify-content: flex-start;
-}
-.signal-row span:last-child {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  line-height: 1.5;
 }
 .badge {
   display: inline-block;
@@ -573,27 +497,6 @@ tbody tr:last-child td {
   color: #52775d;
   margin-right: 8px;
 }
-.evidence-summary {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-.evidence-summary div {
-  background: #fff;
-  border: 1px solid #e1e8e2;
-  border-radius: 9px;
-  padding: 17px 21px;
-  min-width: 170px;
-  display: grid;
-  gap: 2px;
-}
-.evidence-summary strong {
-  font: 800 25px system-ui;
-  color: #27664e;
-}
-.evidence-summary span {
-  color: #728b7b;
-}
 .evidence-list {
   display: grid;
   gap: 11px;
@@ -632,7 +535,7 @@ tbody tr:last-child td {
 .roadmap-lane {
   background: #edf2ed;
   border-radius: 9px;
-  min-height: 150px;
+  min-height: 104px;
   padding: 13px;
 }
 .lane-title {
@@ -649,13 +552,30 @@ tbody tr:last-child td {
   margin-left: auto;
   color: #81968a;
 }
+.roadmap-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
 .roadmap-card {
   background: #fff;
   border: 1px solid #e2e9e2;
   border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 10px;
+  padding: 14px;
   line-height: 1.5;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+.roadmap-order {
+  color: #8ba095;
+  font:
+    700 10px ui-monospace,
+    monospace;
+  padding-top: 2px;
 }
 .roadmap-card strong {
   color: #304b3a;
@@ -1036,7 +956,6 @@ tbody tr:last-child td {
   padding: 40px;
 }
 @media (max-width: 980px) {
-  .dashboard-grid,
   .roadmap-grid {
     grid-template-columns: 1fr;
   }
@@ -1098,10 +1017,6 @@ tbody tr:last-child td {
   }
   .count {
     margin-left: 0;
-  }
-  .evidence-summary div {
-    min-width: 0;
-    flex: 1;
   }
   .detail {
     padding: 21px;

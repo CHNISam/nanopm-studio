@@ -1,144 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { ArrowRight, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Badge, Empty, ItemLink } from "../components/ProductUI.jsx";
 import { date, low, pretty } from "../model.js";
-export function Current({ data, select, go }) {
-  const active = data.opportunities.filter((x) => x.status !== "archived");
-  const bets = data.solutions.filter((x) =>
-    ["chosen", "speccing", "shortlisted"].includes(x.status),
-  );
-  const uncertain = data.signals
-    .filter((x) =>
-      x.states.some((state) =>
-        ["UNPROVEN", "UNKNOWN", "UNTESTED"].includes(state),
-      ),
-    )
-    .slice(0, 4);
-  return (
-    <>
-      <div className="hero">
-        <span className="eyebrow">PRODUCT CONTROL SURFACE</span>
-        <h2>{data.objective?.title || "No Product Outcome recorded"}</h2>
-        <p>
-          {data.objective?.summary ||
-            "Add an objectives page to the NanoPM wiki to show the current outcome here."}
-        </p>
-        {data.objective && (
-          <ItemLink item={data.objective} select={select}>
-            Open outcome
-          </ItemLink>
-        )}
-      </div>
-      <div className="dashboard-grid">
-        <section className="panel">
-          <div className="panel-head">
-            <h3>Active opportunities</h3>
-            <button onClick={() => go("opportunities")}>
-              View all <ArrowRight size={14} />
-            </button>
-          </div>
-          {active.length ? (
-            active.map((item) => (
-              <button
-                key={item.key}
-                className="stack-row"
-                onClick={() => select(item)}
-              >
-                <span>
-                  <strong>{item.title}</strong>
-                  <small>{item.theme || item.id}</small>
-                </span>
-                <Badge value={item.status} />
-              </button>
-            ))
-          ) : (
-            <Empty
-              title="No active opportunities"
-              text="NanoPM has no active Opportunity pages."
-            />
-          )}
-        </section>
-        <section className="panel">
-          <div className="panel-head">
-            <h3>Current solution bets</h3>
-            <button onClick={() => go("solutions")}>
-              View all <ArrowRight size={14} />
-            </button>
-          </div>
-          {bets.length ? (
-            bets.map((item) => (
-              <button
-                key={item.key}
-                className="stack-row"
-                onClick={() => select(item)}
-              >
-                <span>
-                  <strong>{item.title}</strong>
-                  <small>{pretty(item.opportunity)}</small>
-                </span>
-                <Badge value={item.status} />
-              </button>
-            ))
-          ) : (
-            <div className="quiet">
-              No solution has been shortlisted or chosen.{" "}
-              {data.solutions.length} candidates remain proposed.
-            </div>
-          )}
-        </section>
-        <section className="panel">
-          <div className="panel-head">
-            <h3>Unknown or unproven</h3>
-            <button onClick={() => go("evidence")}>
-              Evidence <ArrowRight size={14} />
-            </button>
-          </div>
-          {uncertain.length ? (
-            uncertain.map((s, i) => (
-              <button
-                key={i}
-                className="signal-row"
-                onClick={() =>
-                  select(data.items.find((x) => x.key === s.source))
-                }
-              >
-                <Badge
-                  value={s.states.find((state) =>
-                    ["UNPROVEN", "UNKNOWN", "UNTESTED"].includes(state),
-                  )}
-                />
-                <span>{s.text}</span>
-              </button>
-            ))
-          ) : (
-            <div className="quiet">
-              No explicit unknown or unproven claims found in the evidence
-              pages.
-            </div>
-          )}
-        </section>
-        <section className="panel">
-          <div className="panel-head">
-            <h3>Recently updated</h3>
-          </div>
-          {data.recent.slice(0, 6).map((item) => (
-            <button
-              className="stack-row"
-              key={item.key}
-              onClick={() => select(item)}
-            >
-              <span>
-                <strong>{item.title}</strong>
-                <small>{pretty(item.type)}</small>
-              </span>
-              <time>{date(item.updated)}</time>
-            </button>
-          ))}
-        </section>
-      </div>
-    </>
-  );
-}
 
 export function Tree({ data, select }) {
   const [term, setTerm] = useState("");
@@ -172,7 +35,7 @@ export function Tree({ data, select }) {
             {opportunity.title}
           </button>
           <Badge value={opportunity.status} />
-          <small>{opportunity.priority}</small>
+          <Badge value={opportunity.priority} tone="subtle" />
         </summary>
         <div className="tree-children">
           {data.solutions
@@ -217,17 +80,13 @@ export function Tree({ data, select }) {
               </details>
             ))}
           {!data.solutions.some((x) => x.opportunity === opportunity.id) && (
-            <p className="muted">No linked solutions</p>
+            <p className="muted">No solutions</p>
           )}
         </div>
       </details>
     );
   return (
     <section className="panel tree-panel">
-      <p className="section-intro">
-        Only explicit NanoPM objective and parent links form the tree. Open a
-        node to inspect its Product context.
-      </p>
       <label className="search-field tree-search">
         <Search size={16} />
         <input
@@ -255,7 +114,7 @@ export function Tree({ data, select }) {
       {!data.opportunities.length && (
         <Empty
           title="No opportunities yet"
-          text="NanoPM Opportunity pages will appear here."
+          text="Create an Opportunity in NanoPM to see it here."
         />
       )}
     </section>
@@ -283,23 +142,9 @@ export function Evidence({ data, select }) {
   ];
   return (
     <>
-      <div className="evidence-summary">
-        <div>
-          <strong>{data.evidence.length}</strong>
-          <span>Evidence & proof pages</span>
-        </div>
-        <div>
-          <strong>{data.claims?.length || 0}</strong>
-          <span>Explicit proof judgments</span>
-        </div>
-        <div>
-          <strong>{data.signals.length}</strong>
-          <span>Source signals</span>
-        </div>
-      </div>
       <p className="section-intro">
-        Judgments and labels below come from NanoPM sources. Technical checks do
-        not become Product proof.
+        Review explicit Product judgments and their source evidence. Technical
+        checks remain technical evidence.
       </p>
       <div className="toolbar">
         <label className="search-field">
@@ -327,7 +172,7 @@ export function Evidence({ data, select }) {
       </div>
       {claims.length > 0 && (
         <section className="proof-section">
-          <h3>Product proof judgments</h3>
+          <h3>Claims · {claims.length}</h3>
           <div className="proof-grid">
             {claims.map((claim) => (
               <button
@@ -356,7 +201,7 @@ export function Evidence({ data, select }) {
       )}
       {signals.length ? (
         <section className="proof-section">
-          <h3>Evidence signals</h3>
+          <h3>Evidence notes · {signals.length}</h3>
           <div className="evidence-list">
             {signals.map((s, i) => (
               <button
@@ -381,8 +226,8 @@ export function Evidence({ data, select }) {
         </section>
       ) : (
         <Empty
-          title="No explicit evidence signals"
-          text="Evidence pages remain available through search and the source narrative."
+          title="No matching evidence"
+          text="Try another search or judgment filter."
         />
       )}
       {data.evidence.length > 0 && (
@@ -401,8 +246,7 @@ export function Roadmap({ data, select }) {
   return data.roadmap ? (
     <>
       <p className="section-intro">
-        Product roadmap horizons from the canonical NanoPM roadmap. These are
-        not execution statuses.
+        Now, Next, and Later communicate Product direction, not delivery status.
       </p>
       <div className="roadmap-grid">
         {["now", "next", "later"].map((lane) => (
@@ -412,14 +256,26 @@ export function Roadmap({ data, select }) {
               <h3>{pretty(lane)}</h3>
               <small>{lanes[lane].length}</small>
             </div>
-            {lanes[lane].map((entry, i) => (
-              <div className="roadmap-card" key={i}>
-                <strong>
-                  {typeof entry === "string" ? entry : entry.title}
-                </strong>
-                {entry.detail && <p>{entry.detail}</p>}
-              </div>
-            ))}
+            {lanes[lane].length > 0 && (
+              <ol
+                className="roadmap-list"
+                aria-label={`${pretty(lane)} roadmap items`}
+              >
+                {lanes[lane].map((entry, i) => (
+                  <li className="roadmap-card" key={i}>
+                    <span className="roadmap-order">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <div>
+                      <strong>
+                        {typeof entry === "string" ? entry : entry.title}
+                      </strong>
+                      {entry.detail && <p>{entry.detail}</p>}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            )}
             {!lanes[lane].length && (
               <p className="quiet">No {lane} items recorded.</p>
             )}

@@ -38,8 +38,17 @@ test("browser navigates Product model, search, details, and external file change
   try {
     const port = server.address().port;
     await page.goto(`http://127.0.0.1:${port}`);
+    await page.getByRole("heading", { name: "Product tree" }).waitFor();
+    assert.equal(new URL(page.url()).pathname, "/");
+    assert.equal(
+      await page
+        .getByRole("navigation", { name: "Main navigation" })
+        .getByRole("link", { name: "Current" })
+        .count(),
+      0,
+    );
     await page
-      .getByRole("heading", { name: /PO-1|PO-VFP01/ })
+      .getByText(/PO-1|PO-VFP01/, { exact: false })
       .first()
       .waitFor();
     if (!own) {
@@ -72,14 +81,6 @@ test("browser navigates Product model, search, details, and external file change
       });
     if (process.env.STUDIO_SCREENSHOT_DIR) {
       await fs.mkdir(process.env.STUDIO_SCREENSHOT_DIR, { recursive: true });
-      await page.screenshot({
-        path: path.join(process.env.STUDIO_SCREENSHOT_DIR, "current.png"),
-        fullPage: true,
-      });
-      await page
-        .getByRole("navigation", { name: "Main navigation" })
-        .getByRole("link", { name: "Product tree" })
-        .click();
       await page.screenshot({
         path: path.join(process.env.STUDIO_SCREENSHOT_DIR, "product-tree.png"),
         fullPage: true,
@@ -134,7 +135,7 @@ test("browser navigates Product model, search, details, and external file change
     await page.keyboard.press("Escape");
     await page
       .getByRole("navigation", { name: "Main navigation" })
-      .getByRole("link", { name: "Evidence & learning" })
+      .getByRole("link", { name: "Evidence" })
       .click();
     await page.locator(".badge", { hasText: "UNPROVEN" }).first().waitFor();
     if (process.env.STUDIO_SCREENSHOT_DIR)
@@ -152,6 +153,24 @@ test("browser navigates Product model, search, details, and external file change
       .or(page.getByText("Test cues"))
       .first()
       .waitFor();
+    if (own)
+      assert.equal(
+        await page
+          .locator(".roadmap-lane")
+          .first()
+          .locator(".roadmap-card")
+          .count(),
+        2,
+      );
+    if (own)
+      assert.deepEqual(
+        await page
+          .locator(".roadmap-lane")
+          .first()
+          .locator(".roadmap-card p")
+          .allTextContents(),
+        ["Test cues", "Review evidence"],
+      );
     if (process.env.STUDIO_SCREENSHOT_DIR)
       await page.screenshot({
         path: path.join(process.env.STUDIO_SCREENSHOT_DIR, "roadmap.png"),
@@ -223,7 +242,7 @@ test("browser opens a project, filters the tree, and recovers after a malformed 
     await page
       .getByRole("button", { name: "Open project", exact: true })
       .click();
-    await page.getByRole("heading", { name: /PO-1/ }).first().waitFor();
+    await page.getByText(/PO-1/, { exact: false }).first().waitFor();
     await page.getByText("1 source diagnostics").waitFor();
 
     await page
@@ -282,10 +301,16 @@ test("browser switches workspaces through recent projects without restarting", a
   try {
     const url = `http://127.0.0.1:${server.address().port}`;
     await page.goto(url);
-    await page.getByRole("heading", { name: /PO-SECOND/ }).waitFor();
+    await page
+      .getByText(/PO-SECOND/, { exact: false })
+      .first()
+      .waitFor();
     await page.getByRole("button", { name: /CURRENT PROJECT/ }).click();
     await page.getByTitle(await fs.realpath(first)).click();
-    await page.getByRole("heading", { name: /PO-FIRST/ }).waitFor();
+    await page
+      .getByText(/PO-FIRST/, { exact: false })
+      .first()
+      .waitFor();
     assert.equal(new URL(page.url()).pathname, "/");
 
     await fs.rm(second, { recursive: true, force: true });

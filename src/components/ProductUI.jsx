@@ -213,7 +213,7 @@ export function Detail({ item, data, select, close }) {
           {item.provenance && <Badge value={item.provenance} tone="subtle" />}
         </div>
         <section className="detail-section">
-          <h3>Product context</h3>
+          <h3>Details</h3>
           <div className="meta-grid">
             <Meta label="ID">{item.id}</Meta>
             <Meta label="Updated">{date(item.updated)}</Meta>
@@ -231,12 +231,12 @@ export function Detail({ item, data, select, close }) {
           </div>
           {parent && (
             <p className="relation">
-              Parent opportunity <ItemLink item={parent} select={select} />
+              Opportunity <ItemLink item={parent} select={select} />
             </p>
           )}
           {children.length > 0 && (
             <div className="related">
-              <span>Candidate solutions</span>
+              <span>Solutions</span>
               {children.map((x) => (
                 <ItemLink key={x.key} item={x} select={select} />
               ))}
@@ -255,13 +255,11 @@ export function Detail({ item, data, select, close }) {
             </div>
           )}
           {item.evidenceSources?.length > 0 && (
-            <Meta label="Evidence sources">
-              {item.evidenceSources.join(", ")}
-            </Meta>
+            <Meta label="Evidence">{item.evidenceSources.join(", ")}</Meta>
           )}
         </section>
         <section className="detail-section narrative">
-          <h3>Source narrative</h3>
+          <h3>Full description</h3>
           <p className="source-path">{item.path}</p>
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.body}</ReactMarkdown>
         </section>

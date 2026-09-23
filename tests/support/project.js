@@ -27,7 +27,7 @@ export async function createProject() {
   await writePage(
     root,
     "docs/roadmap.md",
-    "---\ntype: roadmap\n---\n| Horizon | Result |\n| --- | --- |\n| Now | Test cues |\n| Next | Improve cues |\n| Later | Expand |",
+    "---\ntype: roadmap\n---\n| Horizon | Result |\n| --- | --- |\n| Now | Test cues |\n| Now | Review evidence |\n| Next | Improve cues |\n| Later | Expand |",
   );
   return root;
 }
