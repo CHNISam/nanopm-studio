@@ -31,4 +31,14 @@ The existing tree remains an Opportunity comparison map. Its Outcome grouping re
 
 ## Real-source acceptance boundary
 
-The source-backed local acceptance subset contains 13 current `develop` wiki pages: current-work, objectives, product, roadmap, formal proof and outcome pages, three Opportunities and three Solutions. It has three Opportunity parents, three Solution candidates, 16 unproven formal claims and no broken parent diagnostics. It is a subset, not a complete private repository checkout. Full browser scenario and screenshots require a Chromium binary and the complete checkout; a model-level pass alone cannot establish product usability.
+The source-backed local acceptance subset contains 13 current `develop` wiki pages: current-work, objectives, product, roadmap, formal proof and outcome pages, three Opportunities and three Solutions. It has three Opportunity parents, three Solution candidates, 16 unproven formal claims and no broken parent diagnostics. It is a subset, not a complete private repository checkout. Browser tests and screenshots run against this subset using a local Chromium binary. The observed seven-question walkthrough below is a self-review of the UI, not an independent human study.
+
+| Question | Answer available from Studio | Limit |
+| --- | --- | --- |
+| Who / Job | Current-work excerpt identifies a player without a salient direction and the need to discover a personally worthwhile pursuit | Persona, anti-persona and segment have no dedicated canonical page in the fetched subset |
+| Outcome | PO-VFP01 tests a connected First Playable player value chain | A test objective, not achieved Product validation |
+| Opportunity | Three explicit Outcome-linked Opportunities; current-work calls out direction discovery as active | The active marker is displayed as a labeled source excerpt, not a typed relation |
+| Solution Space | Authored cues, state-derived exposure and event-created provider under the direction Opportunity | All are proposed, assumed alternatives |
+| Strategy / Scope | Current Product choices and two explicit Solution links to PO-VFP01 | Release scope and prerequisite have no structured field; event-created's source prose says it is not a VFP01 prerequisite |
+| Evidence / Confidence | 16 formal claims UNPROVEN; each candidate's assumption and cheapest test can be opened | Product proof cannot be inferred from technical checks |
+| Focus / Next | Current-work excerpt names VFP-2/W170 composition, VFP-22 candidate and VFP-23 fresh-player adoption test; Roadmap holds Now / Next / Later | The promotion rule is narrative; no structured gate relation is projected |

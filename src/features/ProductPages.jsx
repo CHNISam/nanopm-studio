@@ -24,14 +24,22 @@ export function DecisionBrief({ data, select }) {
   const relevant = view.opportunities.filter((item) =>
     item.linkedObjectives.includes(data.objective?.id),
   );
-  const focusExcerpt = data.current?.body
-    .match(/^# Now\s*\n([\s\S]*?)(?=^##\s|$)/m)?.[1]
-    ?.split(/\n\s*\n/)
-    .slice(0, 3)
-    .join(" ")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/[*`]/g, "")
-    .slice(0, 440);
+  const excerpt = (text, limit = 220) =>
+    text
+      ?.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      .replace(/[*`]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, limit);
+  const activeExcerpt = excerpt(
+    data.current?.body.match(/^\*\*Active Opportunity:\*\*([^\n]+)/m)?.[1],
+  );
+  const nextExcerpt = excerpt(
+    data.current?.body.match(
+      /^\*\*Candidate Solutions and test:\*\*([^\n]+)/m,
+    )?.[1],
+    300,
+  );
   const productExcerpt = context?.body
     .match(/^\| Anime[^\n]+/m)?.[0]
     ?.split("|")?.[2]
@@ -50,21 +58,32 @@ export function DecisionBrief({ data, select }) {
         <article className="brief-card">
           <span className="brief-number">01 / WHO & JOB</span>
           <h3>For whom, in what situation?</h3>
-          <SourceNote item={personas} select={select}>
-            {personas?.title}
-          </SourceNote>
+          {personas && (
+            <SourceNote item={personas} select={select}>
+              {personas.title}
+            </SourceNote>
+          )}
           {!personas && (
-            <p>
-              No Persona / JTBD page. The Opportunity below describes a need;
-              its segment and anti-persona remain unspecified here.
-            </p>
+            <>
+              <p>
+                {activeExcerpt
+                  ? `Current-work excerpt: ${activeExcerpt}…`
+                  : relevant[0]
+                    ? `Opportunity excerpt: ${excerpt(relevant[0].summary, 180)}…`
+                    : "No linked Opportunity recorded."}
+              </p>
+              <p>
+                Persona, target segment and anti-persona: unspecified in
+                .nanopm/wiki.
+              </p>
+            </>
           )}
         </article>
         <article className="brief-card">
           <span className="brief-number">02 / OUTCOME</span>
           <h3>What change are we testing?</h3>
           <strong>{data.objective?.title || "Unspecified"}</strong>
-          <p>{data.objective?.summary}</p>
+          <p>{excerpt(data.objective?.summary, 190)}…</p>
           <SourceNote item={data.objective} select={select}>
             Open outcome
           </SourceNote>
@@ -94,7 +113,9 @@ export function DecisionBrief({ data, select }) {
           <span className="brief-number">05 / STRATEGY & SCOPE</span>
           <h3>What is the current bet?</h3>
           {productExcerpt && (
-            <p className="source-excerpt">Source excerpt: {productExcerpt}</p>
+            <p className="source-excerpt">
+              Source excerpt: {excerpt(productExcerpt, 190)}…
+            </p>
           )}
           <SourceNote item={strategy || context} select={select}>
             {strategy?.title || context?.title}
@@ -123,9 +144,14 @@ export function DecisionBrief({ data, select }) {
         <article className="brief-card brief-focus">
           <span className="brief-number">07 / FOCUS & NEXT</span>
           <h3>What should we examine next?</h3>
-          {focusExcerpt && (
+          {activeExcerpt && (
             <p className="source-excerpt">
-              Current-work excerpt: {focusExcerpt}…
+              Active Opportunity · current-work excerpt: {activeExcerpt}…
+            </p>
+          )}
+          {nextExcerpt && (
+            <p className="source-excerpt">
+              Next test · current-work excerpt: {nextExcerpt}…
             </p>
           )}
           <SourceNote item={data.current || data.roadmap} select={select}>
@@ -377,12 +403,12 @@ export function Evidence({ data, select }) {
             ))}
           </div>
         </section>
-      ) : (
+      ) : claims.length === 0 ? (
         <Empty
           title="No matching evidence"
           text="Try another search or judgment filter."
         />
-      )}
+      ) : null}
       {data.evidence.length > 0 && (
         <div className="page-links">
           {data.evidence.map((x) => (

@@ -480,6 +480,8 @@ tbody tr:last-child td {
 .brief-focus {
   background: #eaf4ec;
   border-color: #c9e2d0;
+  grid-column: 1 / -1;
+  min-height: 0;
 }
 .brief-card a {
   color: #196b58;
