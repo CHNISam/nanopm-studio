@@ -2,6 +2,141 @@ import React, { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Badge, Empty, ItemLink } from "../components/ProductUI.jsx";
 import { date, low, pretty } from "../model.js";
+import { decisionForSolution, decisionSnapshot } from "../decision.js";
+
+function SourceNote({ item, select, children }) {
+  return item ? (
+    <ItemLink item={item} select={select}>
+      {children || item.title}
+    </ItemLink>
+  ) : (
+    <span className="muted">Unspecified in .nanopm/wiki</span>
+  );
+}
+
+export function DecisionBrief({ data, select }) {
+  const view = decisionSnapshot(data);
+  const personas = data.items.find(
+    (item) => item.type === "personas" || item.key === "docs/personas.md",
+  );
+  const context = data.items.find((item) => item.type === "product");
+  const strategy = data.items.find((item) => item.type === "strategy");
+  const relevant = view.opportunities.filter((item) =>
+    item.linkedObjectives.includes(data.objective?.id),
+  );
+  const focusExcerpt = data.current?.body
+    .match(/^# Now\s*\n([\s\S]*?)(?=^##\s|$)/m)?.[1]
+    ?.split(/\n\s*\n/)
+    .slice(0, 3)
+    .join(" ")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/[*`]/g, "")
+    .slice(0, 440);
+  const productExcerpt = context?.body
+    .match(/^\| Anime[^\n]+/m)?.[0]
+    ?.split("|")?.[2]
+    ?.trim();
+  return (
+    <section className="decision-brief" aria-label="Product decision brief">
+      <div className="brief-heading">
+        <span className="eyebrow">DECISION BRIEF · SOURCE: .NANOPM</span>
+        <h2>What needs a decision now?</h2>
+        <p>
+          Source links open the canonical page. Missing relations remain
+          unspecified.
+        </p>
+      </div>
+      <div className="brief-grid">
+        <article className="brief-card">
+          <span className="brief-number">01 / WHO & JOB</span>
+          <h3>For whom, in what situation?</h3>
+          <SourceNote item={personas} select={select}>
+            {personas?.title}
+          </SourceNote>
+          {!personas && (
+            <p>
+              No Persona / JTBD page. The Opportunity below describes a need;
+              its segment and anti-persona remain unspecified here.
+            </p>
+          )}
+        </article>
+        <article className="brief-card">
+          <span className="brief-number">02 / OUTCOME</span>
+          <h3>What change are we testing?</h3>
+          <strong>{data.objective?.title || "Unspecified"}</strong>
+          <p>{data.objective?.summary}</p>
+          <SourceNote item={data.objective} select={select}>
+            Open outcome
+          </SourceNote>
+        </article>
+        <article className="brief-card">
+          <span className="brief-number">03 / OPPORTUNITY</span>
+          <h3>Which needs link to the Outcome?</h3>
+          <strong>{relevant.length} linked Opportunities</strong>
+          <div className="brief-list">
+            {relevant.map((item) => (
+              <SourceNote key={item.key} item={item} select={select} />
+            ))}
+          </div>
+          {!relevant.length && <p>No explicit links recorded.</p>}
+        </article>
+        <article className="brief-card">
+          <span className="brief-number">04 / SOLUTION SPACE</span>
+          <h3>Which candidates exist?</h3>
+          <strong>{view.solutions.length} candidate Solutions</strong>
+          <p>
+            Grouped by Opportunity below. Compare their explicit Outcome links,
+            assumptions and cheapest tests.
+          </p>
+          <a href="#opportunity-map">Compare candidates ↓</a>
+        </article>
+        <article className="brief-card">
+          <span className="brief-number">05 / STRATEGY & SCOPE</span>
+          <h3>What is the current bet?</h3>
+          {productExcerpt && (
+            <p className="source-excerpt">Source excerpt: {productExcerpt}</p>
+          )}
+          <SourceNote item={strategy || context} select={select}>
+            {strategy?.title || context?.title}
+          </SourceNote>
+          <p>
+            Release membership and prerequisites are unspecified in structured
+            source. An Outcome link alone does not establish either.
+          </p>
+        </article>
+        <article className="brief-card">
+          <span className="brief-number">06 / EVIDENCE</span>
+          <h3>What has Product proof?</h3>
+          <strong>
+            {view.proof.total
+              ? `${view.proof.unproven} / ${view.proof.total} explicit claims UNPROVEN`
+              : "No structured Product claims"}
+          </strong>
+          <p>
+            Assumptions and cheapest tests are shown on each candidate.
+            Technical PASS is a separate proof type.
+          </p>
+          <SourceNote item={data.evidence?.[0]} select={select}>
+            Open evidence
+          </SourceNote>
+        </article>
+        <article className="brief-card brief-focus">
+          <span className="brief-number">07 / FOCUS & NEXT</span>
+          <h3>What should we examine next?</h3>
+          {focusExcerpt && (
+            <p className="source-excerpt">
+              Current-work excerpt: {focusExcerpt}…
+            </p>
+          )}
+          <SourceNote item={data.current || data.roadmap} select={select}>
+            {data.current?.title || "Open roadmap"}
+          </SourceNote>
+          <p>Now / Next / Later is Product direction, not delivery status.</p>
+        </article>
+      </div>
+    </section>
+  );
+}
 
 export function Tree({ data, select }) {
   const [term, setTerm] = useState("");
@@ -59,6 +194,17 @@ export function Tree({ data, select }) {
                     {solution.title}
                   </button>
                   <Badge value={solution.status} />
+                  <span className="relation-label">
+                    {decisionForSolution(solution, root).outcome === "linked"
+                      ? `Linked to outcome ${root.id}`
+                      : "No explicit outcome link"}
+                  </span>
+                  <span className="relation-label neutral">
+                    Release scope unspecified
+                  </span>
+                  <span className="relation-label neutral">
+                    Evidence: {pretty(solution.provenance) || "unspecified"}
+                  </span>
                 </summary>
                 {(solution.assumption || solution.test) && (
                   <div
@@ -86,7 +232,14 @@ export function Tree({ data, select }) {
       </details>
     );
   return (
-    <section className="panel tree-panel">
+    <section className="panel tree-panel" id="opportunity-map">
+      <div className="tree-explainer">
+        <h2>Opportunity → candidate solutions</h2>
+        <p>
+          Indentation shows the Solution’s Opportunity parent. It does not
+          establish Outcome membership, Release scope, or a prerequisite.
+        </p>
+      </div>
       <label className="search-field tree-search">
         <Search size={16} />
         <input

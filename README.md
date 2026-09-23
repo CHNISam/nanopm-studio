@@ -49,7 +49,7 @@ Run the API separately with `npm start -- --project D:\path\to\project --no-open
 
 ## How to use it
 
-- **Product tree** is the default working surface. It shows the current Outcome, Opportunities, Solutions, and their status without duplicating them in a dashboard. Assumption and Test summaries use progressive disclosure; full narrative remains in Detail.
+- **Product tree** opens with a seven-question decision brief, then an Opportunity comparison map. The map distinguishes a Solution's Opportunity parent, its explicit Outcome link, lifecycle, evidence provenance, and unspecified Release scope. Assumption and Test summaries use progressive disclosure; full narrative remains in Detail.
 - **Opportunities** and **Solutions** provide sorting, text search, status filters, a fixed identity column, and structured details.
 - **Evidence** exposes explicit claims and source notes with search and judgment filtering. Studio never strengthens Product proof.
 - **Roadmap** preserves canonical Now, Next, and Later ordering and supports dense multi-item lanes.
@@ -57,6 +57,8 @@ Run the API separately with `npm start -- --project D:\path\to\project --no-open
 - Product surfaces and open entity details have stable browser routes, including refresh and back/forward behavior.
 
 The browser refreshes the model every three seconds, so Agent or human edits to `.nanopm/` appear without an import step. Malformed files and unresolved Solution parents are reported in source diagnostics. Product decisions remain read-only in Studio; make them through NanoPM's canonical skills and files. Studio does not call Backlog.md or create execution state.
+
+Studio does not infer a Release commitment or prerequisite from a Solution's Opportunity parent, Outcome link, lifecycle status, or prose. Where NanoPM has no structured relation, the surface says unspecified. See [decision surface audit](docs/product-design-audit.md).
 
 ## Architecture
 

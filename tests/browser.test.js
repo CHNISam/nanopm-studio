@@ -39,6 +39,9 @@ test("browser navigates Product model, search, details, and external file change
     const port = server.address().port;
     await page.goto(`http://127.0.0.1:${port}`);
     await page.getByRole("heading", { name: "Product tree" }).waitFor();
+    await page
+      .getByRole("region", { name: "Product decision brief" })
+      .waitFor();
     assert.equal(new URL(page.url()).pathname, "/");
     assert.equal(
       await page
@@ -73,6 +76,33 @@ test("browser navigates Product model, search, details, and external file change
         "later",
       ]);
       assert.deepEqual(snapshot.diagnostics, []);
+      const event = snapshot.solutions.find(
+        (x) => x.id === "event-created-opportunities",
+      );
+      assert.equal(event.opportunity, "find-a-worthwhile-direction");
+      assert.deepEqual(event.linkedObjectives, []);
+      const row = page.locator(".tree-solution", {
+        hasText: "Event-created opportunity provider",
+      });
+      assert.match(
+        await row.locator("summary").innerText(),
+        /No explicit outcome link/,
+      );
+      assert.match(
+        await row.locator("summary").innerText(),
+        /Release scope unspecified/,
+      );
+      assert.doesNotMatch(
+        await row.locator("summary").innerText(),
+        /Deferred|Required/,
+      );
+      const authored = page.locator(".tree-solution", {
+        hasText: "Authored world-native cues",
+      });
+      assert.match(
+        await authored.locator("summary").innerText(),
+        /Linked to outcome PO-VFP01/,
+      );
     }
     if (process.env.STUDIO_SCREENSHOT)
       await page.screenshot({

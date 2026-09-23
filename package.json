@@ -24,7 +24,7 @@
     "start": "node server/cli.js",
     "build": "vite build",
     "prepare": "npm run build",
-    "test": "node --test tests/cli.test.js tests/model.test.js tests/server.test.js tests/workspaces.test.js",
+    "test": "node --test tests/cli.test.js tests/decision.test.js tests/model.test.js tests/server.test.js tests/workspaces.test.js",
     "test:browser": "node --test tests/browser.test.js",
     "windows:install": "npm link && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install-windows-launcher.ps1",
     "windows:uninstall": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install-windows-launcher.ps1 -Remove",
