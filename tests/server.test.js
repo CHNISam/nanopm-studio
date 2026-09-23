@@ -5,6 +5,7 @@ import path from "node:path";
 import { once } from "node:events";
 import { spawn } from "node:child_process";
 import http from "node:http";
+import net from "node:net";
 import os from "node:os";
 import { fileURLToPath } from "node:url";
 import { createApp } from "../server/app.js";
@@ -155,6 +156,32 @@ test("HTTP rejects non-local Host and unknown API paths", async () => {
   }
 });
 
+test("project loading remains available when workspace preferences cannot be saved", async () => {
+  const root = await createProject();
+  const workspaces = {
+    async remember() {
+      throw new Error("preferences are read-only");
+    },
+    async list() {
+      return [];
+    },
+  };
+  const server = createApp(root, { workspaces }).listen(0, "127.0.0.1");
+  await once(server, "listening");
+  try {
+    const response = await fetch(
+      `http://127.0.0.1:${server.address().port}/api/project`,
+    );
+    assert.equal(response.status, 200);
+    const snapshot = await response.json();
+    assert.equal(snapshot.objective.id, "PO-1");
+    assert.equal(snapshot.project, await fs.realpath(root));
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    await fs.rm(root, { recursive: true, force: true });
+  }
+});
+
 test("CLI starts on loopback using the current project directory", async () => {
   const root = await createProject();
   const cli = fileURLToPath(new URL("../server/cli.js", import.meta.url));
@@ -242,6 +269,55 @@ test("CLI restores the last project and an explicit project always wins", async 
     if (running?.child.exitCode === null) await stopCli(running.child);
     await fs.rm(first, { recursive: true, force: true });
     await fs.rm(second, { recursive: true, force: true });
+    await fs.rm(config, { recursive: true, force: true });
+  }
+});
+
+test("CLI emits a machine-readable ready event for Agent use", async () => {
+  const root = await createProject();
+  const config = await fs.mkdtemp(path.join(os.tmpdir(), "nanopm-cli-json-"));
+  const cli = fileURLToPath(new URL("../server/cli.js", import.meta.url));
+  const reservation = net.createServer().listen(0, "127.0.0.1");
+  await once(reservation, "listening");
+  const requestedPort = reservation.address().port;
+  await new Promise((resolve) => reservation.close(resolve));
+  const child = spawn(
+    process.execPath,
+    [cli, root, "--no-open", "--port", String(requestedPort), "--json"],
+    {
+      cwd: os.tmpdir(),
+      env: { ...process.env, NANOPM_STUDIO_CONFIG_DIR: config },
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+  try {
+    const ready = await new Promise((resolve, reject) => {
+      const timeout = setTimeout(
+        () => reject(new Error("No JSON ready event")),
+        10000,
+      );
+      child.stdout.once("data", (chunk) => {
+        clearTimeout(timeout);
+        try {
+          resolve(JSON.parse(chunk.toString().trim()));
+        } catch (error) {
+          reject(error);
+        }
+      });
+      child.once("error", reject);
+    });
+    assert.equal(ready.event, "ready");
+    assert.equal(ready.host, "127.0.0.1");
+    assert.equal(ready.port, requestedPort);
+    assert.equal(new URL(ready.url).port, String(ready.port));
+    assert.equal(
+      (await (await fetch(`${ready.url}/api/project`)).json()).objective.id,
+      "PO-1",
+    );
+  } finally {
+    child.kill();
+    if (child.exitCode === null) await once(child, "exit");
+    await fs.rm(root, { recursive: true, force: true });
     await fs.rm(config, { recursive: true, force: true });
   }
 });

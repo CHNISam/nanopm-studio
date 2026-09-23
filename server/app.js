@@ -25,7 +25,14 @@ export function createApp(initialProject = "", options = {}) {
     const result = await loadProject(projectPath);
     let resolvedProject = projectPath;
     if (forceRemember || !remembered) {
-      resolvedProject = await workspaces.remember(projectPath);
+      try {
+        resolvedProject = await workspaces.remember(projectPath);
+      } catch (error) {
+        resolvedProject = await fs.realpath(path.resolve(projectPath));
+        console.warn(
+          `NanoPM Studio could not save workspace history (${error.message}).`,
+        );
+      }
       project = resolvedProject;
       remembered = true;
     }
