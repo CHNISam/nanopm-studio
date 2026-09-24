@@ -2,6 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { decisionForSolution, decisionSnapshot } from "../src/decision.js";
 import { loadProject } from "../server/model.js";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { createServer } from "vite";
 
 const outcome = { id: "PO-VFP01", title: "Connected player value" };
 const opportunity = {
@@ -100,5 +103,44 @@ test(
         (x) => x.release === "unspecified" && x.prerequisite === "unspecified",
       ),
     );
+  },
+);
+
+test(
+  "decision brief projects the existing target and release judgment without inferring solution scope",
+  { skip: !process.env.NANOPM_ACCEPTANCE },
+  async () => {
+    const data = await loadProject(process.env.NANOPM_ACCEPTANCE);
+    const vite = await createServer({
+      server: { middlewareMode: true },
+      optimizeDeps: { noDiscovery: true, include: [] },
+    });
+    try {
+      const { DecisionBrief } = await vite.ssrLoadModule(
+        "/src/features/ProductPages.jsx",
+      );
+      const html = renderToStaticMarkup(
+        React.createElement(DecisionBrief, { data, select() {} }),
+      );
+      assert.match(html, /primary target is a player/i);
+      assert.match(
+        html,
+        /Release decision excerpt: Current Product\/Release judgment: OPEN, UNPROVEN/,
+      );
+      assert.match(
+        html,
+        /Release membership and prerequisites are unspecified/,
+      );
+      assert.doesNotMatch(
+        html,
+        /Persona, target segment and anti-persona: unspecified/,
+      );
+      assert.match(
+        html,
+        /Specific target segment and anti-persona: unspecified/,
+      );
+    } finally {
+      await vite.close();
+    }
   },
 );
