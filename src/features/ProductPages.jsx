@@ -20,6 +20,8 @@ export function DecisionBrief({ data, select }) {
     (item) => item.type === "personas" || item.key === "docs/personas.md",
   );
   const context = data.items.find((item) => item.type === "product");
+  const company = data.items.find((item) => item.type === "company");
+  const release = data.items.find((item) => item.type === "release-proof");
   const strategy = data.items.find((item) => item.type === "strategy");
   const relevant = view.opportunities.filter((item) =>
     item.linkedObjectives.includes(data.objective?.id),
@@ -58,6 +60,16 @@ export function DecisionBrief({ data, select }) {
         <article className="brief-card">
           <span className="brief-number">01 / WHO & JOB</span>
           <h3>For whom, in what situation?</h3>
+          {company && (
+            <>
+              <p className="source-excerpt">
+                Product direction excerpt: {excerpt(company.summary, 275)}…
+              </p>
+              <SourceNote item={company} select={select}>
+                Open product direction
+              </SourceNote>
+            </>
+          )}
           {personas && (
             <SourceNote item={personas} select={select}>
               {personas.title}
@@ -73,8 +85,9 @@ export function DecisionBrief({ data, select }) {
                     : "No linked Opportunity recorded."}
               </p>
               <p>
-                Persona, target segment and anti-persona: unspecified in
-                .nanopm/wiki.
+                {company
+                  ? "Specific target segment and anti-persona: unspecified in .nanopm/wiki."
+                  : "Target player, specific segment and anti-persona: unspecified in .nanopm/wiki."}
               </p>
             </>
           )}
@@ -120,6 +133,16 @@ export function DecisionBrief({ data, select }) {
           <SourceNote item={strategy || context} select={select}>
             {strategy?.title || context?.title}
           </SourceNote>
+          {release && (
+            <>
+              <p className="source-excerpt">
+                Release decision excerpt: {excerpt(release.summary, 175)}…
+              </p>
+              <SourceNote item={release} select={select}>
+                Open VFP01 release decision
+              </SourceNote>
+            </>
+          )}
           <p>
             Release membership and prerequisites are unspecified in structured
             source. An Outcome link alone does not establish either.
