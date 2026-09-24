@@ -231,8 +231,27 @@ export function Detail({ item, data, select, close }) {
           </div>
           {parent && (
             <p className="relation">
-              Opportunity <ItemLink item={parent} select={select} />
+              Opportunity parent <ItemLink item={parent} select={select} />
             </p>
+          )}
+          {item.type === "solution" && (
+            <div className="relation-stack" aria-label="Decision relations">
+              <Meta label="Outcome relation">
+                {item.linkedObjectives?.includes(data.objective?.id)
+                  ? `Linked to ${data.objective.id}`
+                  : "No explicit outcome link"}
+              </Meta>
+              <Meta label="Release scope">
+                Unspecified in structured source
+              </Meta>
+              <Meta label="Prerequisite">Unspecified in structured source</Meta>
+              <Meta label="Lifecycle">
+                {pretty(item.status) || "Unspecified"}
+              </Meta>
+              <Meta label="Evidence basis">
+                {pretty(item.provenance) || "Unspecified"}
+              </Meta>
+            </div>
           )}
           {children.length > 0 && (
             <div className="related">

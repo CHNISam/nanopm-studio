@@ -425,6 +425,109 @@ tbody tr:last-child td {
 .tree-panel {
   padding: 22px 25px;
 }
+.decision-brief {
+  margin-bottom: 24px;
+}
+.brief-heading {
+  margin-bottom: 16px;
+}
+.brief-heading h2 {
+  margin: 5px 0 4px;
+  font-size: 22px;
+}
+.brief-heading p,
+.tree-explainer p {
+  color: #60766b;
+  margin: 0;
+  line-height: 1.5;
+}
+.brief-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.brief-card {
+  min-height: 154px;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid #dfe8df;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.brief-card h3 {
+  font-size: 14px;
+  margin: 0;
+  color: #203c32;
+}
+.brief-card strong {
+  font-size: 15px;
+  line-height: 1.4;
+}
+.brief-card p {
+  margin: 0;
+  color: #62756b;
+  line-height: 1.5;
+}
+.brief-number {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #508373;
+}
+.brief-focus {
+  background: #eaf4ec;
+  border-color: #c9e2d0;
+  grid-column: 1 / -1;
+  min-height: 0;
+}
+.brief-card a {
+  color: #196b58;
+  font-weight: 700;
+}
+.brief-card .text-link {
+  margin-top: auto;
+}
+.brief-list {
+  display: grid;
+  gap: 6px;
+}
+.brief-card .brief-list .text-link {
+  margin: 0;
+  text-align: left;
+}
+.brief-card .source-excerpt {
+  color: #334b40;
+}
+.tree-explainer {
+  margin-bottom: 17px;
+}
+.tree-explainer h2 {
+  font-size: 17px;
+  margin-bottom: 4px;
+}
+.relation-label {
+  color: #186650;
+  background: #e9f5eb;
+  border: 1px solid #cce7d3;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 6px;
+}
+.relation-label.neutral {
+  color: #5e6d66;
+  background: #f3f5f2;
+  border-color: #e0e6df;
+}
+.relation-stack {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
 .tree-root {
   background: #edf4ec;
   border-radius: 8px;
@@ -449,6 +552,7 @@ tbody tr:last-child td {
 .tree-node summary {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 9px;
   padding: 9px 13px;
   cursor: pointer;
@@ -956,6 +1060,9 @@ tbody tr:last-child td {
   padding: 40px;
 }
 @media (max-width: 980px) {
+  .brief-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .roadmap-grid {
     grid-template-columns: 1fr;
   }
@@ -985,6 +1092,10 @@ tbody tr:last-child td {
   }
 }
 @media (max-width: 600px) {
+  .brief-grid,
+  .relation-stack {
+    grid-template-columns: 1fr;
+  }
   .sidebar {
     width: 52px;
   }

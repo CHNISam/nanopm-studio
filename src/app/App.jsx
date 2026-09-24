@@ -24,7 +24,12 @@ import {
   useParams,
 } from "react-router-dom";
 import { Badge, Detail, Grid } from "../components/ProductUI.jsx";
-import { Evidence, Roadmap, Tree } from "../features/ProductPages.jsx";
+import {
+  DecisionBrief,
+  Evidence,
+  Roadmap,
+  Tree,
+} from "../features/ProductPages.jsx";
 import { date, pretty } from "../model.js";
 import { ProductProvider, useProduct } from "./ProductContext.jsx";
 
@@ -244,6 +249,20 @@ function Workspace() {
         size: 110,
         cell: (x) => <Badge value={x.getValue()} />,
       }),
+      columnHelper.accessor(
+        (row) =>
+          row.linkedObjectives?.includes(data.objective?.id)
+            ? `Linked: ${data.objective.id}`
+            : "No explicit outcome link",
+        { id: "outcome", header: "Outcome relation", size: 200 },
+      ),
+      columnHelper.accessor("provenance", {
+        header: "Evidence basis",
+        size: 120,
+        cell: (x) => (
+          <Badge value={x.getValue() || "unspecified"} tone="subtle" />
+        ),
+      }),
       columnHelper.accessor("lens", { header: "Lens", size: 90 }),
       columnHelper.accessor("appetite", {
         header: "Appetite",
@@ -350,7 +369,12 @@ function Workspace() {
                   ))}
                 </details>
               )}
-              {surface === "tree" && <Tree data={data} select={select} />}
+              {surface === "tree" && (
+                <>
+                  <DecisionBrief data={data} select={select} />
+                  <Tree data={data} select={select} />
+                </>
+              )}
               {surface === "opportunities" && (
                 <Grid
                   rows={data.opportunities}

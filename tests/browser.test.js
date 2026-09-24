@@ -39,6 +39,34 @@ test("browser navigates Product model, search, details, and external file change
     const port = server.address().port;
     await page.goto(`http://127.0.0.1:${port}`);
     await page.getByRole("heading", { name: "Product tree" }).waitFor();
+    await page
+      .getByRole("region", { name: "Product decision brief" })
+      .waitFor();
+    if (!own) {
+      const brief = page.getByRole("region", {
+        name: "Product decision brief",
+      });
+      const who = brief.locator(".brief-card").nth(0);
+      assert.match(await who.innerText(), /primary target is a player/i);
+      assert.doesNotMatch(
+        await who.innerText(),
+        /Persona, target segment and anti-persona: unspecified/i,
+      );
+      const scope = brief.locator(".brief-card").nth(4);
+      assert.match(
+        await scope.innerText(),
+        /release judgment: OPEN, UNPROVEN/i,
+      );
+      await scope.getByRole("button", { name: /release decision/i }).waitFor();
+      assert.match(
+        await brief.locator(".brief-card").first().innerText(),
+        /Find a worthwhile direction when no salient one exists/,
+      );
+      assert.match(
+        await brief.innerText(),
+        /VFP-23 tests noticed → understood → voluntarily adopted/,
+      );
+    }
     assert.equal(new URL(page.url()).pathname, "/");
     assert.equal(
       await page
@@ -73,6 +101,33 @@ test("browser navigates Product model, search, details, and external file change
         "later",
       ]);
       assert.deepEqual(snapshot.diagnostics, []);
+      const event = snapshot.solutions.find(
+        (x) => x.id === "event-created-opportunities",
+      );
+      assert.equal(event.opportunity, "find-a-worthwhile-direction");
+      assert.deepEqual(event.linkedObjectives, []);
+      const row = page.locator(".tree-solution", {
+        hasText: "Event-created opportunity provider",
+      });
+      assert.match(
+        await row.locator("summary").innerText(),
+        /No explicit outcome link/,
+      );
+      assert.match(
+        await row.locator("summary").innerText(),
+        /Release scope unspecified/,
+      );
+      assert.doesNotMatch(
+        await row.locator("summary").innerText(),
+        /Deferred|Required/,
+      );
+      const authored = page.locator(".tree-solution", {
+        hasText: "Authored world-native cues",
+      });
+      assert.match(
+        await authored.locator("summary").innerText(),
+        /Linked to outcome PO-VFP01/,
+      );
     }
     if (process.env.STUDIO_SCREENSHOT)
       await page.screenshot({
@@ -122,6 +177,39 @@ test("browser navigates Product model, search, details, and external file change
         .getByRole("combobox", { name: "Filter opportunity" })
         .selectOption("find-a-worthwhile-direction");
       assert.equal(await page.locator("tbody tr").count(), 3);
+      await page
+        .getByRole("row", { name: /Event-created opportunity provider/ })
+        .click();
+      const detail = page.getByRole("complementary", {
+        name: "solution detail",
+      });
+      assert.match(await detail.innerText(), /No explicit outcome link/);
+      assert.match(
+        await detail.innerText(),
+        /Release scope\s+Unspecified in structured source/,
+      );
+      assert.match(await detail.innerText(), /not a VFP01 prerequisite/i);
+      if (process.env.STUDIO_SCREENSHOT_DIR)
+        await page.screenshot({
+          path: path.join(
+            process.env.STUDIO_SCREENSHOT_DIR,
+            "event-created-detail.png",
+          ),
+          fullPage: true,
+        });
+      if (process.env.STUDIO_SCREENSHOT_DIR) {
+        await detail.evaluate((element) => {
+          element.scrollTop = element.scrollHeight;
+        });
+        await page.screenshot({
+          path: path.join(
+            process.env.STUDIO_SCREENSHOT_DIR,
+            "event-created-source.png",
+          ),
+          fullPage: true,
+        });
+      }
+      await page.keyboard.press("Escape");
     }
     await page.keyboard.press("Control+k");
     await page
@@ -144,6 +232,8 @@ test("browser navigates Product model, search, details, and external file change
         fullPage: true,
       });
     if (!own) assert.equal(await page.locator(".proof-card").count(), 16);
+    if (!own)
+      assert.equal(await page.getByText("No matching evidence").count(), 0);
     await page
       .getByRole("navigation", { name: "Main navigation" })
       .getByRole("link", { name: "Roadmap" })
@@ -296,7 +386,12 @@ test("browser switches workspaces through recent projects without restarting", a
   const workspaces = createWorkspaceStore({ cwd: config });
   await workspaces.remember(first);
   const server = createApp(second, { workspaces }).listen(0, "127.0.0.1");
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({
+    headless: true,
+    ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
+      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE }
+      : {}),
+  });
   const page = await browser.newPage();
   try {
     const url = `http://127.0.0.1:${server.address().port}`;
