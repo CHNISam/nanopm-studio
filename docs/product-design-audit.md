@@ -20,7 +20,22 @@ Studio reads `.nanopm/wiki` and helps a product owner decide what is known, whic
 
 The current NanoPM schema supplies `opportunity`, `linked_objectives`, lifecycle `status`, `provenance`, `priority`, assumption and cheapest test. It does not supply a general structured Release scope or prerequisite relation. Studio shows the missing relation as unspecified. It presents narrative source excerpts as excerpts, never promotes them into typed facts. No schema delta is introduced in this repository; any future promotion needs a canonical upstream decision and migration rule.
 
-The existing tree remains an Opportunity comparison map. Its Outcome grouping reflects the Opportunity's explicit objective link, while each candidate independently shows its own objective link. This avoids a visual parent relationship masquerading as a Release commitment. The brief uses existing pages; missing Persona/JTBD material is named as a gap.
+The existing tree remains an Opportunity comparison map. Its Outcome grouping reflects the Opportunity's explicit objective link, while each candidate independently shows its own objective link. This avoids a visual parent relationship masquerading as a Release commitment. The brief projects the target player from the canonical company page as a labeled excerpt, while leaving a specific segment and anti-persona unspecified. It also links the canonical Release judgment without treating the Release page's prose as a per-Solution scope edge.
+
+## Source-of-Truth trace · current develop
+
+Read direction: Studio snapshot → Nameless Reach `.nanopm/wiki` → NanoPM's existing model and skills. The current Studio input is the 16 Product pages named by the Nameless Reach wiki index at `ed1c6e88e4517031164c3aca83afed6e42ea25b2`; repository-wide checkout access was unavailable. The index can be stale, so this is a full **indexed Product set**, not proof that every unindexed file in `develop` was examined.
+
+| Judgment | Studio input | Canonical Project state | NanoPM capability / actual gap | Minimum action |
+| --- | --- | --- | --- | --- |
+| Who and Job | Company and current-work pages were loaded but the brief skipped the company's target statement | `overview/company.md` names the primary player; `current-work.md` names the no-direction situation. A specific segment and anti-persona are absent from the indexed Product pages | NanoPM supports personas and JTBD; this instance has no dedicated Persona page. Dominant defect was Studio projection | Show the existing target as a sourced excerpt; retain the narrower unknown |
+| Outcome and Opportunities | Objective and all three explicit Opportunity links load | `docs/objectives.md` sets PO-VFP01 as a test, three Opportunity pages link it; `current-work.md` names the active one | Existing objectives, Opportunity links and lifecycle suffice | No change |
+| Solution space | Three Solution pages load, with parent, lifecycle, provenance and independent objective links | Three proposed alternatives; two have explicit PO-VFP01 links, Event-created has none | Existing Solution model suffices | No change |
+| Strategy and Release scope | Product choices loaded; `vfp01-release.md` loaded as `release-proof` but absent from the brief | Release is OPEN, UNPROVEN. Event-created's source prose says it is outside committed VFP01 scope, but its page has no structured Release-scope relation | NanoPM has typed `scope-in` / `scope-out` decisions in its separate state log, while this project's current Product authority is the wiki. No supported per-Solution Release edge is established here; missing projection of the Release page is the actionable gap | Show the Release judgment as a source excerpt and link the page. Leave each Solution's structured Release and prerequisite relation unspecified |
+| Evidence and confidence | Formal claims, provenance, assumptions and cheapest tests load | 16 formal claims are UNPROVEN; `provenance: assumed` on each Solution | Existing claim and provenance surfaces suffice | No change |
+| Focus and next | Current-work and roadmap load | Current work points to VFP-2/W170, VFP-22 and VFP-23, with separate Now/Next/Later horizons | Existing source is adequate for a labeled excerpt | No change |
+
+No new NanoPM model capability was proven necessary for this correction. In particular, nesting, objective links, status and prose do not authorize calling Event-created selected, validated, included in VFP01 or a prerequisite. A future structured scope claim requires an explicit decision in the project's canonical Product authority.
 
 ## External patterns used
 
@@ -31,14 +46,14 @@ The existing tree remains an Opportunity comparison map. Its Outcome grouping re
 
 ## Real-source acceptance boundary
 
-The source-backed local acceptance subset contains 13 current `develop` wiki pages: current-work, objectives, product, roadmap, formal proof and outcome pages, three Opportunities and three Solutions. It has three Opportunity parents, three Solution candidates, 16 unproven formal claims and no broken parent diagnostics. It is a subset, not a complete private repository checkout. Browser tests and screenshots run against this subset using a local Chromium binary. The observed seven-question walkthrough below is a self-review of the UI, not an independent human study.
+The current local acceptance input contains all 16 pages named by the `develop` wiki index: two overviews, eight docs, three Opportunities and three Solutions. It has three Opportunity parents, three Solution candidates, 16 unproven formal claims and no broken parent diagnostics. The source commit and each file's blob identity were checked when fetching. This is not a complete private repository checkout; unindexed pages cannot be excluded. The rendered brief is checked against these real pages in an automated component test. Browser and screenshot verification in this environment remain pending because Chromium was unavailable and its download returned a corrupt archive. The walkthrough below is a self-review, not an independent human study.
 
 | Question | Answer available from Studio | Limit |
 | --- | --- | --- |
-| Who / Job | Current-work excerpt identifies a player without a salient direction and the need to discover a personally worthwhile pursuit | Persona, anti-persona and segment have no dedicated canonical page in the fetched subset |
+| Who / Job | Company direction names the primary target player; current-work names the no-direction situation | Specific segment and anti-persona have no dedicated canonical page in the indexed set |
 | Outcome | PO-VFP01 tests a connected First Playable player value chain | A test objective, not achieved Product validation |
 | Opportunity | Three explicit Outcome-linked Opportunities; current-work calls out direction discovery as active | The active marker is displayed as a labeled source excerpt, not a typed relation |
 | Solution Space | Authored cues, state-derived exposure and event-created provider under the direction Opportunity | All are proposed, assumed alternatives |
-| Strategy / Scope | Current Product choices and two explicit Solution links to PO-VFP01 | Release scope and prerequisite have no structured field; event-created's source prose says it is not a VFP01 prerequisite |
+| Strategy / Scope | Current Product choices, Release OPEN/UNPROVEN judgment, and two explicit Solution links to PO-VFP01 | Per-Solution Release scope and prerequisite remain unspecified in structured data; event-created's source prose says it is not a VFP01 prerequisite |
 | Evidence / Confidence | 16 formal claims UNPROVEN; each candidate's assumption and cheapest test can be opened | Product proof cannot be inferred from technical checks |
 | Focus / Next | Current-work excerpt names VFP-2/W170 composition, VFP-22 candidate and VFP-23 fresh-player adoption test; Roadmap holds Now / Next / Later | The promotion rule is narrative; no structured gate relation is projected |
