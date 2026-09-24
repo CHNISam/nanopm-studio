@@ -46,6 +46,18 @@ test("browser navigates Product model, search, details, and external file change
       const brief = page.getByRole("region", {
         name: "Product decision brief",
       });
+      const who = brief.locator(".brief-card").nth(0);
+      assert.match(await who.innerText(), /primary target is a player/i);
+      assert.doesNotMatch(
+        await who.innerText(),
+        /Persona, target segment and anti-persona: unspecified/i,
+      );
+      const scope = brief.locator(".brief-card").nth(4);
+      assert.match(
+        await scope.innerText(),
+        /release judgment: OPEN, UNPROVEN/i,
+      );
+      await scope.getByRole("button", { name: /release decision/i }).waitFor();
       assert.match(
         await brief.locator(".brief-card").first().innerText(),
         /Find a worthwhile direction when no salient one exists/,
